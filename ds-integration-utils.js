@@ -1,16 +1,37 @@
 const APP_CONFIG = {
     oAuthServiceProviderDev: "https://account-d.docusign.com",
-    oAuthServiceProviderPrd: "https://account.docusign.com",
+    oAuthServiceProviderProd: "https://account.docusign.com",
     userInfoPath: "/oauth/userinfo",
     eSignBase: "/restapi/v2.1",
-    jwtUrl: "https://ar.barsystems.it/mv_ds_token/",
+    jwtUrlDev: "https://ar.barsystems.it/mv_ds_token/",
+    jwtProd: "https://ambiente.prod.it",
     devEnvironment: "dev",
     prodEnvironment: "prod",
     oauthResponse: "oauthResponse",
     dsResponse: "dsResponse",
     roleStudent: "STUDENTE",
     documentsType: ['contratto_studente', 'dichiarazione_sostitutiva', 'doppia_iscrizione'],
-    templateMap: [
+    templateMapDev: [
+        {
+            acronymUni:"umt",
+            templates: ["bf7a3abf-7d8b-4412-ba0f-925ea31b8dba", "", ""],
+            baseUriGetDocs:"https://online-enrolment-api-v2.dev2.mercatorum.multiversity.click/docusign/get-document",
+            baseUriSendDocs:"https://online-enrolment-api-v2.dev2.mercatorum.multiversity.click/docusign/save-document"
+        },
+        {
+            acronymUni:"utp",
+            templates: ["a7f24ceb-ba0b-4e8e-95de-a90706ca36be", "", ""],
+            baseUriGetDocs:"https://online-enrolment-api-v2.dev2.pegaso.multiversity.click/docusign/get-document",
+            baseUriSendDocs:"https://online-enrolment-api-v2.dev2.pegaso.multiversity.click/docusign/save-document"
+        },
+        {
+            acronymUni:"utsr",
+            templates: ["9f397aab-aefd-4eab-9946-52b2cfdd3e3a", "", ""],
+            baseUriGetDocs:"https://online-enrolment-api-v2.dev2.utsr.multiversity.click/docusign/get-document",
+            baseUriSendDocs:"https://online-enrolment-api-v2.dev2.utsr.multiversity.click/docusign/save-document"
+        }
+    ],
+    templateMapProd: [
         {
             acronymUni:"umt",
             templates: ["bf7a3abf-7d8b-4412-ba0f-925ea31b8dba", "", ""],
@@ -78,14 +99,19 @@ class ImplicitGrant {
         this.oauthResponse = APP_CONFIG.oauthResponse;
         this.dsResponse = APP_CONFIG.dsResponse;
         this.roleStudent = APP_CONFIG.roleStudent;
-        this.templateMap = APP_CONFIG.templateMap;
         this.documentsType = APP_CONFIG.documentsType;
         this.accessToken = null;
     }
 
     async login() {
         try {
-            const response = await fetch(APP_CONFIG.jwtUrl, { method: HTTP_METHODS.get });
+            const response = await fetch(
+                `${this.inputParams.platform}`.toLocaleLowerCase() == APP_CONFIG.devEnvironment ? 
+                APP_CONFIG.jwtUrlDev : 
+                APP_CONFIG.jwtProd,
+                {
+                    method: HTTP_METHODS.get 
+                });
             if (!response.ok) {
                 throw new Error(`${response.status}`);
             }
@@ -121,7 +147,7 @@ class UserInfo {
     constructor(args) {
         this.accessToken = args.accessToken;
         this.envelopeId = args.envelopeId || null;
-        this.oAuthServiceProvider = args.platform == APP_CONFIG.prodEnvironment ? APP_CONFIG.oAuthServiceProviderPrd : APP_CONFIG.oAuthServiceProviderDev;
+        this.oAuthServiceProvider = args.platform == APP_CONFIG.prodEnvironment ? APP_CONFIG.oAuthServiceProviderProd : APP_CONFIG.oAuthServiceProviderDev;
         this.userInfoPath = APP_CONFIG.userInfoPath;
         this.eSignBase = APP_CONFIG.eSignBase;
 
@@ -133,6 +159,8 @@ class UserInfo {
         this.defaultBaseUrl = null;
         this.userInfoResponse = null;
         this.accounts = [];
+
+        this.templateMap = args.templateMap;
 
 
     }
@@ -269,4 +297,4 @@ class CallApi {
     }
 }
 
-export { CallApi, ImplicitGrant, UserInfo, StudentInfo, APP_MESSAGES, HTTP_METHODS};
+export { CallApi, ImplicitGrant, UserInfo, StudentInfo, APP_CONFIG, APP_MESSAGES, HTTP_METHODS};

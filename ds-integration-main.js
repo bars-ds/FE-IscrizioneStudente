@@ -4,6 +4,7 @@ import {
     ImplicitGrant,
     UserInfo,
     StudentInfo,
+    APP_CONFIG,
     APP_MESSAGES,
     HTTP_METHODS
 } from "./ds-integration-utils.js";
@@ -66,7 +67,7 @@ import {
 
     async function createEnvelope(signer) {
         try {
-            const tempObj = data.implicitGrant.templateMap.find(temp => temp.acronymUni == signer.university);
+            const tempObj = data.userInfo.templateMap.find(temp => temp.acronymUni == signer.university);
             const tempIds = tempObj.templates.slice(0, parseInt(signer.enrollment_type, 10));
             const documentsArr = signer.documents.sort(
                 (a, b) => 
@@ -356,9 +357,9 @@ import {
     async function retryDocs (){
         try {
             console.log(`Retry Docs Multiversity`);
-            console.log( data.implicitGrant.templateMap.find(temp => temp.acronymUni == data.studentInfo.university));
+            console.log( data.userInfo.templateMap.find(temp => temp.acronymUni == data.studentInfo.university));
             
-            const tempObj = data.implicitGrant.templateMap.find(temp => temp.acronymUni == data.studentInfo.university);
+            const tempObj = data.userInfo.templateMap.find(temp => temp.acronymUni == data.studentInfo.university);
             const apiMethod = `${tempObj.baseUriGetDocs}/${data.studentInfo.practiceId}/${data.studentInfo.enrollment_type}`;
             const httpMethod = HTTP_METHODS.get;
             console.log(apiMethod);
@@ -379,7 +380,7 @@ import {
     async function sendDocs (docs){
         try {
             console.log(`Send Docs Multiversity`);
-            const tempObj = data.implicitGrant.templateMap.find(temp => temp.acronymUni == data.studentInfo.university);
+            const tempObj = data.userInfo.templateMap.find(temp => temp.acronymUni == data.studentInfo.university);
             const apiMethod = `${tempObj.baseUriSendDocs}`;
             const httpMethod = HTTP_METHODS.post;
             const req = {
@@ -444,6 +445,9 @@ import {
             data.userInfo = new UserInfo({
                 accessToken: data.implicitGrant.accessToken,
                 platform: `${data.implicitGrant.inputParams.platform}`.toLowerCase(),
+                templateMap: `${data.implicitGrant.inputParams.platform}`.toLowerCase() == APP_CONFIG.devEnvironment ?
+                APP_CONFIG.templateMapDev :
+                APP_CONFIG.templateMapProd
             });
             await data.userInfo.getUserInfo();
             data.callApi = new CallApi({
