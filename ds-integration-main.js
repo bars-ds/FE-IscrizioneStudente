@@ -312,6 +312,7 @@ async function signature(inputParams = {}) {
 
     async function signingCeremonyEnded(eventData, envelopeId) {
         try {
+            let sendDocStatus = null;
             if (eventData.source !== data.implicitGrant.dsResponse) {
                 return;
             }
@@ -342,7 +343,7 @@ async function signature(inputParams = {}) {
                 console.log('1.1')
                 const docs = await getAllSignedDocumentsBase64(envelopeId);
                 console.log('1.2')
-                await sendDocs(docs);
+                sendDocStatus = await sendDocs(docs);
                 console.log('1.3')
                 console.log(APP_MESSAGES.signatureText.complete);
 
@@ -352,9 +353,14 @@ async function signature(inputParams = {}) {
                 console.log(APP_MESSAGES.signatureText.pending);
             }
 
-            window.dispatchEvent(new CustomEvent('ds-signature-complete', {
-                detail: { status: resultSignature }
-            }));
+            window.dispatchEvent(
+              new CustomEvent("ds-signature-complete", {
+                detail: {
+                  statusDocusign: resultSignature,
+                  statusResponse: sendDocStatus,
+                },
+              })
+            );
 
         } catch (error) {
             console.error("Errore in signingCeremonyEnded:", error);
@@ -401,8 +407,7 @@ async function signature(inputParams = {}) {
                 req,
                 studentToken: data.studentInfo.token
             });
-            console.log(results);
-            return true;
+            return results.status;
         } catch (error) {
             console.error("Errore in sendDocs:", error);
             throw error;

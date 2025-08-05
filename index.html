@@ -68,7 +68,7 @@
                 data-docusign
                 data-input='{
                   "student_data":{
-                    "email":"testmail@test.it","fullName":"Francesco Izzo", "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWdpc3RyYXRpb25JZCI6MjgxMTk4LCJ0b2tlbiI6Ijc0OGFjMzA2LWIzNWEtNGU3OC1iMjg4LWMzMDcxYjliYjM0NSIsImlhdCI6MTc1NDA0MjY5MCwiZXhwIjoxNzU0MTI5MDkwLCJhdWQiOiJwZWdhc28iLCJpc3MiOiJwZWdhc28ifQ.pNxvxKQnagLjd4Ipv7iKDlSnMQvq13eNdzs3q20SClg"
+                    "email":"testmail@test.it","fullName":"Francesco Izzo", "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWdpc3RyYXRpb25JZCI6Mjc5MTUxLCJ0b2tlbiI6IjFhNjNiN2VkLTY4YTctNDJlMS1hNDYwLTM5OWZhNTM0YTkzZSIsImlhdCI6MTc1NDM5NzM2MSwiZXhwIjoxNzU0NDgzNzYxLCJhdWQiOiJwZWdhc28iLCJpc3MiOiJwZWdhc28ifQ.vKWsIApGQbiMgJpaq9rrDKK6O_mJ616Cv_YU0_oJyjs"
                   },
                   "idPratica":"281198",
                   "university":"UTP",
@@ -102,6 +102,13 @@
 		}
 	  });
 	}
+
+
+
+  window.addEventListener('ds-signature-complete', (e) => {
+    console.log('EVENT RECEIVED:', e.detail.statusDocusign);//stato docusign
+    console.log('EVENT RECEIVED:', e.detail.statusResponse);// o null o status ritornato da API save-document ("success" o "error")
+  });
   </script>
 
 </body>
