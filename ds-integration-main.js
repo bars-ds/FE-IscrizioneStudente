@@ -9,7 +9,7 @@ import {
     HTTP_METHODS
 } from "./ds-integration-utils.js";
 
- async function signature(inputParams = {}) {
+async function signature(inputParams = {}) {
     if (
         !inputParams?.idPratica ||
         !inputParams?.platform ||
@@ -18,7 +18,7 @@ import {
         !inputParams?.student_data?.token ||
         !inputParams?.student_data?.fullName ||
         !inputParams?.student_data?.email
-        ) {
+    ) {
         alert(APP_MESSAGES.errors.genericError);
         return;
     }
@@ -34,7 +34,7 @@ import {
         studentInfo: null,
         callApi: null,
     };
-    
+
     data.implicitGrant = new ImplicitGrant({
         inputParams
     });
@@ -70,11 +70,11 @@ import {
             const tempObj = data.userInfo.templateMap.find(temp => temp.acronymUni == signer.university);
             const tempIds = tempObj.templates.slice(0, parseInt(signer.enrollment_type, 10));
             const documentsArr = signer.documents.sort(
-                (a, b) => 
-                    data.implicitGrant.documentsType.indexOf(a.type) - 
+                (a, b) =>
+                    data.implicitGrant.documentsType.indexOf(a.type) -
                     data.implicitGrant.documentsType.indexOf(b.type)
             );
-            
+
             const req = {
                 status: 'sent',
                 compositeTemplates: tempIds.map((id, i)=> (
@@ -84,26 +84,26 @@ import {
                             templateId: id
                         }],
                         inlineTemplates: [
-                        {
-                            sequence : i+1,
-                            recipients: {
-                                signers: [
-                                    {
-                                        email: signer.email,
-                                        name: signer.fullName,
-                                        clientUserId: signer.clientUserId,
-                                        roleName: data.implicitGrant.roleStudent, 
-                                        recipientId: "1",
-                                        routingOrder: "1",
-                                        emailNotification: {
-                                            emailSubject: `${APP_MESSAGES.emailText.subject} ${signer.fullName}`,
-                                            emailBody: `${signer.fullName} ${APP_MESSAGES.emailText.body}`,
-                                            supportedLanguage: APP_MESSAGES.emailText.lang
+                            {
+                                sequence : i+1,
+                                recipients: {
+                                    signers: [
+                                        {
+                                            email: signer.email,
+                                            name: signer.fullName,
+                                            clientUserId: signer.clientUserId,
+                                            roleName: data.implicitGrant.roleStudent,
+                                            recipientId: "1",
+                                            routingOrder: "1",
+                                            emailNotification: {
+                                                emailSubject: `${APP_MESSAGES.emailText.subject} ${signer.fullName}`,
+                                                emailBody: `${signer.fullName} ${APP_MESSAGES.emailText.body}`,
+                                                supportedLanguage: APP_MESSAGES.emailText.lang
+                                            }
                                         }
-                                    }
-                                ]
-                            }
-                        }],
+                                    ]
+                                }
+                            }],
                         document: {
                             documentId: "1",
                             name: documentsArr[i].name,
@@ -231,9 +231,9 @@ import {
             modal.style.width = '95%';
             modal.style.height = '90%';
             Object.assign(closeBtn.style, {
-            width: '26px',
-            height: '26px',
-            fontSize: '14px',
+                width: '26px',
+                height: '26px',
+                fontSize: '14px',
             });
         }
 
@@ -246,7 +246,7 @@ import {
     function closeModal() {
         const overlay = document.querySelector('#ds-modal-overlay');
         if (overlay) {
-        document.body.removeChild(overlay);
+            document.body.removeChild(overlay);
         }
     }
 
@@ -284,24 +284,24 @@ import {
             const documents = results.envelopeDocuments;
 
             const filteredDocuments = documents
-            .filter(doc => doc.documentId !== 'certificate')
-            .sort((a, b) => Number(a.documentId) - Number(b.documentId));
+                .filter(doc => doc.documentId !== 'certificate')
+                .sort((a, b) => Number(a.documentId) - Number(b.documentId));
             console.log(filteredDocuments);
-            
-            const base64Documents = await Promise.all(filteredDocuments.map(async (document) => {
-            const base64 = await getDocumentBase64(envelopeId, document.documentId);
-            return { 
-                base64, 
-                name: `${document.name}_${APP_MESSAGES.signatureStatus.signed}`
-            };
-            }));
 
+            const base64Documents = await Promise.all(filteredDocuments.map(async (document) => {
+                const base64 = await getDocumentBase64(envelopeId, document.documentId);
+                return {
+                    base64,
+                    name: `${document.name}_${APP_MESSAGES.signatureStatus.signed}`
+                };
+            }));
+            console.log(base64Documents);
             const finalDocs = base64Documents.map((doc, i) => {
                 doc.ext = data.studentInfo.documents[i].ext;
                 doc.type = data.studentInfo.documents[i].type;
                 return doc;
             })
-            console.log('Base64 docs', finalDocs);
+            console.log( finalDocs);
             return finalDocs;
 
         } catch (error) {
@@ -309,7 +309,7 @@ import {
             throw error;
         }
     }
-    
+
     async function signingCeremonyEnded(eventData, envelopeId) {
         try {
             if (eventData.source !== data.implicitGrant.dsResponse) {
@@ -322,7 +322,7 @@ import {
             const qps = hasEvents ? sections[1].split("&") : [];
             let resultSignature = APP_MESSAGES.signatureStatus.pending;
             console.log(qps);
-            
+
             if (!hasEvents) {
                 console.error(`Unexpected signing ceremony response: ${eventData.href}.`);
                 return;
@@ -339,15 +339,23 @@ import {
                 }
             });
             if(resultSignature == APP_MESSAGES.signatureStatus.complete){
+                console.log('1.1')
                 const docs = await getAllSignedDocumentsBase64(envelopeId);
+                console.log('1.2')
                 await sendDocs(docs);
+                console.log('1.3')
                 console.log(APP_MESSAGES.signatureText.complete);
-                
+
             }else if(resultSignature == APP_MESSAGES.signatureStatus.decline){
                 console.log(APP_MESSAGES.signatureText.decline);
             }else{
                 console.log(APP_MESSAGES.signatureText.pending);
             }
+
+            window.dispatchEvent(new CustomEvent('ds-signature-complete', {
+                detail: { status: resultSignature }
+            }));
+
         } catch (error) {
             console.error("Errore in signingCeremonyEnded:", error);
             throw error;
@@ -358,12 +366,12 @@ import {
         try {
             console.log(`Retry Docs Multiversity`);
             console.log( data.userInfo.templateMap.find(temp => temp.acronymUni == data.studentInfo.university));
-            
+
             const tempObj = data.userInfo.templateMap.find(temp => temp.acronymUni == data.studentInfo.university);
             const apiMethod = `${tempObj.baseUriGetDocs}/${data.studentInfo.practiceId}/${data.studentInfo.enrollment_type}`;
             const httpMethod = HTTP_METHODS.get;
             console.log(apiMethod);
-            
+
             const results = await data.callApi.callApiJson({
                 apiMethod: apiMethod,
                 httpMethod: httpMethod,
@@ -386,7 +394,7 @@ import {
             const req = {
                 documents: docs
             }
-            
+
             const results = await data.callApi.callApiJson({
                 apiMethod: apiMethod,
                 httpMethod: httpMethod,
@@ -400,14 +408,14 @@ import {
             throw error;
         }
     }
-    
+
     let messageListener = async function messageListenerf(event) {
         try {
             if (!event.data) {
                 return;
             }
             console.log(event.data);
-            
+
             const source = event.data.source;
             if (source === data.implicitGrant.dsResponse) {
                 await signingCeremonyEnded(event.data, data.userInfo.envelopeId);
@@ -446,8 +454,8 @@ import {
                 accessToken: data.implicitGrant.accessToken,
                 platform: `${data.implicitGrant.inputParams.platform}`.toLowerCase(),
                 templateMap: `${data.implicitGrant.inputParams.platform}`.toLowerCase() == APP_CONFIG.devEnvironment ?
-                APP_CONFIG.templateMapDev :
-                APP_CONFIG.templateMapProd
+                    APP_CONFIG.templateMapDev :
+                    APP_CONFIG.templateMapProd
             });
             await data.userInfo.getUserInfo();
             data.callApi = new CallApi({
@@ -456,14 +464,14 @@ import {
                 platform: `${data.implicitGrant.inputParams.platform}`.toLowerCase()
             });
             console.log(data.implicitGrant.inputParams.student_data);
-            
+
             data.studentInfo = new StudentInfo({
                 practiceId: data.implicitGrant.inputParams.idPratica,
                 university: `${data.implicitGrant.inputParams.university}`.toLowerCase(),
                 enrollment_type: data.implicitGrant.inputParams.enrollment_type,
                 student_data: data.implicitGrant.inputParams.student_data
             });
-            
+
             console.log(`${data.userInfo.name} ${data.userInfo.email} ${data.userInfo.defaultAccountName}`);
         } catch (error) {
             console.error("Errore in completeLogin:", error);
@@ -475,6 +483,6 @@ import {
     window.addEventListener("message", messageListener);
 
     await data.implicitGrant.login();
-    
+
 }
 export { signature };
