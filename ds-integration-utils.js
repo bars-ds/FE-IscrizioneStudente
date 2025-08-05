@@ -75,22 +75,22 @@ const APP_MESSAGES = {
 };
 
 const HTTP_METHODS = {
-  get: "GET",
-  post: "POST",
-  put: "PUT",
-  delete: "DELETE"
+    get: "GET",
+    post: "POST",
+    put: "PUT",
+    delete: "DELETE"
 };
 
 const FETCH_MODES = {
-  cors: "cors",
-  no_cors: "no-cors",
-  same_origin: "same-origin",
+    cors: "cors",
+    no_cors: "no-cors",
+    same_origin: "same-origin",
 };
 
 const CONTENT_TYPES = {
-  json: "application/json",
-  pdf: "application/pdf",
-  text: "text/plain",
+    json: "application/json",
+    pdf: "application/pdf",
+    text: "text/plain",
 };
 
 class ImplicitGrant {
@@ -104,13 +104,16 @@ class ImplicitGrant {
     }
 
     async login() {
+
+        this.accessToken = "eyJ0eXAiOiJNVCIsImFsZyI6IlJTMjU2Iiwia2lkIjoiNjgxODVmZjEtNGU1MS00Y2U5LWFmMWMtNjg5ODEyMjAzMzE3In0.AQoAAAABAAUABwAAgmTfV9PdSAgAAOooQWDT3UgCAGaByQ1R_cpFnbxyBYdF31sVAAEAAAAYAAMAAAAdAAAABQAAAAEBAAANACQAAAA3ZDA1ZDEzOC01MjdmLTQ3YzUtOTFkYi0yNmMwOGYzNGE2YTAiACQAAAA3ZDA1ZDEzOC01MjdmLTQ3YzUtOTFkYi0yNmMwOGYzNGE2YTASAAEAAAAGAAAAand0X2JyIwAkAAAAN2QwNWQxMzgtNTI3Zi00N2M1LTkxZGItMjZjMDhmMzRhNmEw.XdKKQjWzZdsNc4Mh9zqgaA-S8epaUyq1bqNeWkFiZ7XyDrtE52vQ_RLOnbMVhQBhLU1PyMmAWsjISnGTlz_gH7LcdanLW_RmdRoCf-qgiBcPRREfPCmtCCAFNY8vdYC6ufG1PJFkioZWEw77iRFkaei_r6c2486QawGK8kbb3ICmYs57OhA20EccGw3BoFgslCmxroJ2-qoAy3zywOZJE3Rv7tZoV2QRrD2Q-qj05DBwGPMpKsDPhk_pQRFq9ozyFOXJs_m_TuC6xvKaLWRgM9OM3BQTLx8RU1f9ggVE_NzPNrdz77DvzkY3DfXORbRlH96NHoiCnOUGpH_vVIdC6g";
+
         try {
             const response = await fetch(
-                `${this.inputParams.platform}`.toLocaleLowerCase() == APP_CONFIG.devEnvironment ? 
-                APP_CONFIG.jwtUrlDev : 
-                APP_CONFIG.jwtProd,
+                `${this.inputParams.platform}`.toLocaleLowerCase() == APP_CONFIG.devEnvironment ?
+                    APP_CONFIG.jwtUrlDev :
+                    APP_CONFIG.jwtProd,
                 {
-                    method: HTTP_METHODS.get 
+                    method: HTTP_METHODS.get
                 });
             if (!response.ok) {
                 throw new Error(`${response.status}`);
@@ -122,7 +125,7 @@ class ImplicitGrant {
                 this.accessToken = token;
                 if (this.oauthResponse) {
                     window.postMessage({
-                    source: this.oauthResponse,
+                        source: this.oauthResponse,
                     }, "*");
                 }
             } else {
@@ -265,7 +268,7 @@ class CallApi {
             headersReq[header.h] = header.v;
         });
 
-        
+
         try {
             const response = await fetch(url, {
                 method: httpMethod,
@@ -290,7 +293,7 @@ class CallApi {
                 return await response.text();
             }
 
-        } catch (e) {            
+        } catch (e) {
             console.error(`API call error [${httpMethod} ${url}]: ${e.message}`);
             throw new Error(APP_MESSAGES.errors.genericError);
         }
