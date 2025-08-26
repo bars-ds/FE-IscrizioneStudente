@@ -71,7 +71,7 @@
                     "email":"testmail@test.it","fullName":"Francesco Izzo", "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWdpc3RyYXRpb25JZCI6Mjc5MTUxLCJ0b2tlbiI6IjFhNjNiN2VkLTY4YTctNDJlMS1hNDYwLTM5OWZhNTM0YTkzZSIsImlhdCI6MTc1NDM5NzM2MSwiZXhwIjoxNzU0NDgzNzYxLCJhdWQiOiJwZWdhc28iLCJpc3MiOiJwZWdhc28ifQ.vKWsIApGQbiMgJpaq9rrDKK6O_mJ616Cv_YU0_oJyjs"
                   },
                   "idPratica":"281198",
-                  "university":"UTP",
+                  "university":"UTSR",
                   "enrollment_type":"1",
                   "platform":"DEV"
                 }'
@@ -88,9 +88,11 @@
     </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    import { signature } from './ds-integration-main.js';
-	
-    const btn = document.querySelector('[data-docusign]');
+
+  /*MODIFICHE*/
+  import { signature, signatureCompleted } from './ds-integration-main.js';
+
+  const btn = document.querySelector('[data-docusign]');
 
 	if (btn) {
 	  btn.addEventListener('click', e => {
@@ -103,12 +105,28 @@
 	  });
 	}
 
+  window.addEventListener("load", async () => {
+    const params = new URLSearchParams(window.location.search);
+    const state = params.get("event");
+    const signingData = JSON.parse(sessionStorage.getItem('docusignSigningData') || '{}');
+
+    if(state && signingData && Object.keys(signingData).length > 0) {
+      await signatureCompleted(state, signingData);
+      params.delete("event");
+      const newQuery = params.toString();
+      const newUrl = window.location.pathname + (newQuery ? `?${newQuery}` : "");
+      window.history.replaceState({}, document.title, newUrl);
+    }
+  });
+/*FINE_MODIFICHE*/
 
 
-  window.addEventListener('ds-signature-complete', (e) => {
+
+    window.addEventListener('ds-signature-complete', (e) => {
     console.log('EVENT RECEIVED:', e.detail.statusDocusign);//stato docusign
     console.log('EVENT RECEIVED:', e.detail.statusResponse);// o null o status ritornato da API save-document ("success" o "error")
   });
+  
   </script>
 
 </body>
