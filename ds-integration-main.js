@@ -9,7 +9,7 @@ import {
     HTTP_METHODS
 } from "./ds-integration-utils.js";
 
-async function signature(inputParams = {}) {
+async function signature(inputParams = {}, state = "", envelopeId = "", docsType = null) {
     if (
         !inputParams?.idPratica ||
         !inputParams?.platform ||
@@ -22,6 +22,8 @@ async function signature(inputParams = {}) {
         alert(APP_MESSAGES.errors.genericError);
         return;
     }
+	
+	if(state && envelopeId && docsType){showLoader();}
 
     //Sostituire "https://docusign.github.io/jsfiddleDsResponse.html" con URL pagina multiversity dove fare redirect dopo la firma
     const dsReturnUrl = "https://docusign.github.io/jsfiddleDsResponse.html";
@@ -177,8 +179,9 @@ async function signature(inputParams = {}) {
     */
     async function embeddedSigningCeremony({ envelopeId, signer }) {
         try {
+			const docsType = data.studentInfo.documents.map(({ type, ext }) => ({ type, ext }))
             const req = {
-                returnUrl: dsReturnUrl,
+                returnUrl: `${dsReturnUrl}?envelopeId=${envelopeId}&docsType=${encodeURIComponent(JSON.stringify(docsType))}`,
                 authenticationMethod: "None",
                 clientUserId: signer.clientUserId,
                 email: signer.email,
@@ -196,22 +199,6 @@ async function signature(inputParams = {}) {
             });
             console.log(`Envelope created. Response: ${JSON.stringify(results)}`);
             console.log(`Displaying signing ceremony...`);
-            const docsType = data.studentInfo.documents.map(({ type, ext }) => ({ type, ext }))
-            const signingData = {
-                envelopeId: envelopeId,
-                accountId: data.userInfo.defaultAccount,
-                accessToken: data.callApi.accessToken,
-                apiBaseUrl: data.callApi.apiBaseUrl,
-                platform: data.implicitGrant.inputParams.platform,
-                docsType,
-                studentInfo: {
-                    student_token: data.studentInfo.token,
-                    university: data.studentInfo.university,
-                }
-            };
-
-            sessionStorage.setItem('docusignSigningData', JSON.stringify(signingData));
-
             window.location.href = results.url;
             return true;
         } catch (error) {
@@ -257,7 +244,7 @@ async function signature(inputParams = {}) {
             }
         } catch (error) {
             console.error("Errore nel messageListener:", error);
-            alert(error);
+            alert(APP_MESSAGES.errors.genericError);
         }
     };
     messageListener = messageListener.bind(this);
@@ -270,6 +257,22 @@ async function signature(inputParams = {}) {
                 return;
             }
             await completeLogin();
+            if(state && envelopeId && docsType){
+                const signingData = {
+                    envelopeId,
+                    accountId: data.userInfo.defaultAccount,
+                    accessToken: data.callApi.accessToken,
+                    apiBaseUrl: data.callApi.apiBaseUrl,
+                    platform: data.implicitGrant.inputParams.platform,
+                    docsType,
+                    studentInfo: {
+                        student_token: data.studentInfo.token,
+                        university: data.studentInfo.university,
+                    }
+                }
+                await signatureCompleted(state, signingData);
+                return;
+            }
             await retryDocs();
             await createAndSign();
         } catch (error) {
@@ -316,6 +319,54 @@ async function signature(inputParams = {}) {
 
 }
 
+function showLoader() {
+	const overlay = document.createElement('div');
+	overlay.id = 'custom-loader-overlay';
+	Object.assign(overlay.style, {
+		position: 'fixed',
+		top: '0',
+		left: '0',
+		width: '100vw',
+		height: '100vh',
+		backgroundColor: 'rgba(0, 0, 0, 0.5)',
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		zIndex: '99999',
+		cursor: 'wait',
+	});
+
+	const loader = document.createElement('div');
+	loader.id = 'custom-loader-spinner';
+	Object.assign(loader.style, {
+		width: '50px',
+		height: '50px',
+		border: '6px solid #f3f3f3',
+		borderTop: '6px solid #3498db',
+		borderRadius: '50%',
+		animation: 'spin 1s linear infinite',
+	});
+
+	overlay.appendChild(loader);
+	document.body.appendChild(overlay);
+
+	const style = document.createElement('style');
+	style.innerHTML = `
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+	`;
+	document.head.appendChild(style);
+}
+
+function hideLoader() {
+	const overlay = document.getElementById('custom-loader-overlay');
+	if (overlay) {
+		overlay.remove();
+	}
+}
+
 async function signatureCompleted(state, signingData) {
 
     const retryDsDocs = new CallApi({
@@ -352,6 +403,7 @@ async function signatureCompleted(state, signingData) {
             );
 
         } catch (error) {
+            hideLoader();
             console.error("Errore in signingCeremonyEnded:", error);
             throw error;
         }
@@ -443,56 +495,8 @@ async function signatureCompleted(state, signingData) {
         }
     }
     
-    function showLoader() {
-        const overlay = document.createElement('div');
-        overlay.id = 'custom-loader-overlay';
-        Object.assign(overlay.style, {
-            position: 'fixed',
-            top: '0',
-            left: '0',
-            width: '100vw',
-            height: '100vh',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: '99999',
-            cursor: 'wait',
-        });
-
-        const loader = document.createElement('div');
-        loader.id = 'custom-loader-spinner';
-        Object.assign(loader.style, {
-            width: '50px',
-            height: '50px',
-            border: '6px solid #f3f3f3',
-            borderTop: '6px solid #3498db',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-        });
-
-        overlay.appendChild(loader);
-        document.body.appendChild(overlay);
-
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    function hideLoader() {
-        const overlay = document.getElementById('custom-loader-overlay');
-        if (overlay) {
-            overlay.remove();
-        }
-    }
-    showLoader();
     await signingCeremonyEnded(state, signingData.envelopeId);
     hideLoader()
     return;
 }
-export { signature, signatureCompleted };
+export { signature };
