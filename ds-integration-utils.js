@@ -13,7 +13,7 @@ const APP_CONFIG = {
     documentsType: ['contratto_studente', 'dichiarazione_sostitutiva', 'doppia_iscrizione'],
     templateMapDev: [
         {
-            acronymUni:"umt",
+            acronymUni:"utm",
             templates: ["bf7a3abf-7d8b-4412-ba0f-925ea31b8dba", "", ""],
             baseUriGetDocs:"https://online-enrolment-api-v2.dev2.mercatorum.multiversity.click/docusign/get-document",
             baseUriSendDocs:"https://online-enrolment-api-v2.dev2.mercatorum.multiversity.click/docusign/save-document"
@@ -33,7 +33,7 @@ const APP_CONFIG = {
     ],
     templateMapProd: [
         {
-            acronymUni:"umt",
+            acronymUni:"utm",
             templates: ["bf7a3abf-7d8b-4412-ba0f-925ea31b8dba", "", ""],
             baseUriGetDocs:"https://online-enrolment-api-v2.dev2.mercatorum.multiversity.click/docusign/get-document",
             baseUriSendDocs:"https://online-enrolment-api-v2.dev2.mercatorum.multiversity.click/docusign/save-document"
@@ -301,3 +301,4 @@ class CallApi {
 }
 
 export { CallApi, ImplicitGrant, UserInfo, StudentInfo, APP_CONFIG, APP_MESSAGES, HTTP_METHODS};
+
