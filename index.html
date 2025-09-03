@@ -73,7 +73,8 @@
                   "idPratica":"281198",
                   "university":"UTSR",
                   "enrollment_type":"1",
-                  "platform":"DEV"
+                  "platform":"DEV",
+                  "signature_type":"1"
                 }'
                 >
                   Firma Contratto
@@ -90,7 +91,7 @@
   <script type="module">
 
   /*NEW*/
-  import { signature } from './ds-integration-main.js';
+  import { signature, /* signatureCompleted */ } from './ds-integration-main.js';
 
   const btn = document.querySelector('[data-docusign]');
 

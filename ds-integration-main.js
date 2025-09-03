@@ -15,6 +15,7 @@ async function signature(inputParams = {}, state = "", envelopeId = "", docsType
         !inputParams?.platform ||
         !inputParams?.university ||
         !inputParams?.enrollment_type ||
+        !inputParams?.signature_type ||
         !inputParams?.student_data?.token ||
         !inputParams?.student_data?.fullName ||
         !inputParams?.student_data?.email
@@ -25,8 +26,7 @@ async function signature(inputParams = {}, state = "", envelopeId = "", docsType
 	
 	if(state && envelopeId && docsType){showLoader();}
 
-    //Sostituire "https://docusign.github.io/jsfiddleDsResponse.html" con URL pagina multiversity dove fare redirect dopo la firma
-    const dsReturnUrl = "https://docusign.github.io/jsfiddleDsResponse.html";
+    const dsReturnUrl = inputParams?.dsReturnUrl;
 
 
 
@@ -42,36 +42,6 @@ async function signature(inputParams = {}, state = "", envelopeId = "", docsType
         inputParams
     });
 
-    async function getUserDataByDocusign(envelopeId) {
-        try {
-            const req = null;
-            const apiMethod = `/accounts/${data.userInfo.defaultAccount}/envelopes/${envelopeId}/recipients`;
-            const httpMethod = HTTP_METHODS.get;
-            const results = await data.callApi.callApiJson({
-                apiMethod: apiMethod,
-                httpMethod: httpMethod,
-                req: req
-            });
-            console.log(`Envelope created. Response: ${JSON.stringify(results)}`);
-
-            if (results?.signers?.length > 0) {
-                const signer = results.signers[0];
-                console.log(JSON.stringify(signer))
-                return {
-                    name: signer.name,
-                    email: signer.email,
-                    userId: signer.userId
-                };
-            } else {
-                throw new Error("Nessun signer trovato nella response");
-            }
-
-        } catch (error) {
-            console.error("Errore nel recupero dati utente nel getUserDataByDocusign:", error);
-            throw error;
-        }
-    }
-
     async function createAndSign() {
         try {
             const signer = {
@@ -79,30 +49,18 @@ async function signature(inputParams = {}, state = "", envelopeId = "", docsType
                 fullName: data.studentInfo.fullName,
                 university: data.studentInfo.university,
                 enrollment_type: data.studentInfo.enrollment_type,
+                signature_type: data.studentInfo.signature_type,
                 documents: data.studentInfo.documents,
-                clientUserId: 1000,
-                userId: 1
+                clientUserId: 1000
             };
 
             const envelopeId = await createEnvelope(signer);
-
             if (envelopeId) {
                 data.userInfo.envelopeId = envelopeId;
                 console.log(`Envelope ${data.userInfo.envelopeId} created.`);
-
-                const userData = await getUserDataByDocusign(envelopeId)
-                console.log(`UserData:  ${JSON.stringify(userData)} get.`);
-
-                const enrichedSigner = {
-                    ...signer,
-                    fullName: userData.name,
-                    email: userData.email,
-                    userId: userData.userId
-                };
-
                 await embeddedSigningCeremony({
                     envelopeId: data.userInfo.envelopeId,
-                    signer: enrichedSigner
+                    signer: signer
                 });
             }
         } catch (error) {
@@ -114,7 +72,8 @@ async function signature(inputParams = {}, state = "", envelopeId = "", docsType
     async function createEnvelope(signer) {
         try {
             const tempObj = data.userInfo.templateMap.find(temp => temp.acronymUni == signer.university);
-            const tempIds = tempObj.templates.slice(0, parseInt(signer.enrollment_type, 10));
+            const tempType = signer.signature_type == "1" ? tempObj.templatesIdSpid : tempObj.templatesIdVideo;
+            const tempIds = tempType.slice(0, parseInt(signer.enrollment_type, 10));
             const documentsArr = signer.documents.sort(
                 (a, b) =>
                     data.implicitGrant.documentsType.indexOf(a.type) -
@@ -185,8 +144,7 @@ async function signature(inputParams = {}, state = "", envelopeId = "", docsType
                 authenticationMethod: "None",
                 clientUserId: signer.clientUserId,
                 email: signer.email,
-                userName: signer.fullName,
-                userId: signer.userId
+                userName: signer.fullName
             };
 
             // Make the API call
@@ -302,7 +260,8 @@ async function signature(inputParams = {}, state = "", envelopeId = "", docsType
                 practiceId: data.implicitGrant.inputParams.idPratica,
                 university: `${data.implicitGrant.inputParams.university}`.toLowerCase(),
                 enrollment_type: data.implicitGrant.inputParams.enrollment_type,
-                student_data: data.implicitGrant.inputParams.student_data
+                student_data: data.implicitGrant.inputParams.student_data,
+                signature_type : data.implicitGrant.inputParams.signature_type
             });
 
             console.log(`${data.userInfo.name} ${data.userInfo.email} ${data.userInfo.defaultAccountName}`);
