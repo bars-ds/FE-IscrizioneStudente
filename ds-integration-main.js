@@ -140,7 +140,7 @@ async function signature(inputParams = {}, state = "", envelopeId = "", docsType
         try {
 			const docsType = data.studentInfo.documents.map(({ type, ext }) => ({ type, ext }))
             const req = {
-                returnUrl: `${dsReturnUrl}?envelopeId=${envelopeId}&docsType=${encodeURIComponent(JSON.stringify(docsType))}`,
+                returnUrl: `${dsReturnUrl}&envelopeId=${envelopeId}&docsType=${encodeURIComponent(JSON.stringify(docsType))}`,
                 authenticationMethod: "None",
                 clientUserId: signer.clientUserId,
                 email: signer.email,
