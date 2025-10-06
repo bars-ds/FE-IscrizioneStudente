@@ -14,14 +14,16 @@ const APP_CONFIG = {
     templateMapDev: [
         {
             acronymUni:"utm",
-            templates: ["019d9c32-bdd8-4aaa-85dd-cf9a3d1bc130", "", ""],
+            templatesIdSpid: ["019d9c32-bdd8-4aaa-85dd-cf9a3d1bc130", "", ""],
+            templatesIdVideo: ["58b77cd1-6813-4ed8-9090-aa37a4d2dc44", "", ""],
             baseUriGetDocs:"https://online-enrolment-api.dev2.mercatorum.multiversity.click/docusign/get-document",
             baseUriSendDocs:"https://online-enrolment-api.dev2.mercatorum.multiversity.click/docusign/save-document",
             baseUriUP:"https://online-enrolment-api.dev2.mercatorum.multiversity.click/docusign/online"
         },
         {
             acronymUni:"utp",
-            templates: ["0b6b0f1c-dd8a-4a95-9f15-14a931813820", "", ""],
+            templatesIdSpid: ["e5c4905c-b8b6-4460-b790-db2ed71a29c5", "", ""],
+            templatesIdVideo: ["0b6b0f1c-dd8a-4a95-9f15-14a931813820", "", ""],
             baseUriGetDocs:"https://online-enrolment-api-v2.dev2.pegaso.multiversity.click/docusign/get-document",
             baseUriSendDocs:"https://online-enrolment-api-v2.dev2.pegaso.multiversity.click/docusign/save-document",
             baseUriUP:"https://online-enrolment-api-v2.dev2.pegaso.multiversity.click/docusign/online"
@@ -29,7 +31,8 @@ const APP_CONFIG = {
         },
         {
             acronymUni:"utsr",
-            templates: ["9b7e88d4-4669-4257-9585-17b9dfc5ba4e", "", ""],
+            templatesIdSpid: ["9b7e88d4-4669-4257-9585-17b9dfc5ba4e", "", ""],
+            templatesIdVideo: ["a01cd31e-a8f7-4d36-a168-dd812caba24e", "", ""],
             baseUriGetDocs:"https://online-enrolment-api.dev2.utsr.multiversity.click/docusign/get-document",
             baseUriSendDocs:"https://online-enrolment-api.dev2.utsr.multiversity.click/docusign/save-document",
             baseUriUP:"https://online-enrolment-api.dev2.utsr.multiversity.click/docusign/online"
@@ -38,21 +41,24 @@ const APP_CONFIG = {
     templateMapProd: [
         {
             acronymUni:"utm",
-            templates: ["4657dad8-cb81-42b7-8999-c188c8507c22", "", ""],
+            templatesIdSpid: ["4657dad8-cb81-42b7-8999-c188c8507c22", "", ""],
+            templatesIdVideo: ["82813f5a-361c-41eb-a5c8-a24e3699c05c", "", ""],
             baseUriGetDocs:"https://online-enrolment-api.dev2.mercatorum.multiversity.click/docusign/get-document",
             baseUriSendDocs:"https://online-enrolment-api.dev2.mercatorum.multiversity.click/docusign/save-document",
             baseUriUP:"https://online-enrolment-api.dev2.mercatorum.multiversity.click/docusign/online"
         },
         {
             acronymUni:"utp",
-            templates: ["f09c846d-2047-4bc9-9ac3-9ad085a8e7ed", "", ""],
+            templatesIdSpid: ["f09c846d-2047-4bc9-9ac3-9ad085a8e7ed", "", ""],
+            templatesIdVideo: ["48f9d9b1-8391-41ae-8fb6-30db494ae0c5", "", ""],
             baseUriGetDocs:"https://online-enrolment-api-v2.dev2.pegaso.multiversity.click/docusign/get-document",
             baseUriSendDocs:"https://online-enrolment-api-v2.dev2.pegaso.multiversity.click/docusign/save-document",
             baseUriUP:"https://online-enrolment-api-v2.dev2.pegaso.multiversity.click/docusign/online"
         },
         {
             acronymUni:"utsr",
-            templates: ["670bc9ce-7849-4377-939a-3f475b590c1c", "", ""],
+            templatesIdSpid: ["670bc9ce-7849-4377-939a-3f475b590c1c", "", ""],
+            templatesIdVideo: ["c36ccf4e-3879-4683-9fec-f16cb31aa8cd", "", ""],
             baseUriGetDocs:"https://online-enrolment-api.dev2.utsr.multiversity.click/docusign/get-document",
             baseUriSendDocs:"https://online-enrolment-api.dev2.utsr.multiversity.click/docusign/save-document",
             baseUriUP:"https://online-enrolment-api.dev2.utsr.multiversity.click/docusign/online"
@@ -111,8 +117,6 @@ class ImplicitGrant {
     }
 
     async login() {
-
-        this.accessToken = "eyJ0eXAiOiJNVCIsImFsZyI6IlJTMjU2Iiwia2lkIjoiNjgxODVmZjEtNGU1MS00Y2U5LWFmMWMtNjg5ODEyMjAzMzE3In0.AQoAAAABAAUABwAAgmTfV9PdSAgAAOooQWDT3UgCAGaByQ1R_cpFnbxyBYdF31sVAAEAAAAYAAMAAAAdAAAABQAAAAEBAAANACQAAAA3ZDA1ZDEzOC01MjdmLTQ3YzUtOTFkYi0yNmMwOGYzNGE2YTAiACQAAAA3ZDA1ZDEzOC01MjdmLTQ3YzUtOTFkYi0yNmMwOGYzNGE2YTASAAEAAAAGAAAAand0X2JyIwAkAAAAN2QwNWQxMzgtNTI3Zi00N2M1LTkxZGItMjZjMDhmMzRhNmEw.XdKKQjWzZdsNc4Mh9zqgaA-S8epaUyq1bqNeWkFiZ7XyDrtE52vQ_RLOnbMVhQBhLU1PyMmAWsjISnGTlz_gH7LcdanLW_RmdRoCf-qgiBcPRREfPCmtCCAFNY8vdYC6ufG1PJFkioZWEw77iRFkaei_r6c2486QawGK8kbb3ICmYs57OhA20EccGw3BoFgslCmxroJ2-qoAy3zywOZJE3Rv7tZoV2QRrD2Q-qj05DBwGPMpKsDPhk_pQRFq9ozyFOXJs_m_TuC6xvKaLWRgM9OM3BQTLx8RU1f9ggVE_NzPNrdz77DvzkY3DfXORbRlH96NHoiCnOUGpH_vVIdC6g";
 
         try {
             const response = await fetch(
@@ -235,10 +239,12 @@ class StudentInfo{
         this.practiceId = args.practiceId || "";
         this.university = args.university || "";
         this.enrollment_type = args.enrollment_type || "";
+        this.signature_type = args.signature_type || "";
         const student = args.student_data || {};
         this.token = student.token || "";
         this.fullName = student.fullName || "";
         this.email = student.email || "";
+        this.taxCode = student.taxCode || "";
         this.documents = null;
     }
 }
